@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { getEvents, addEvent, updateEvent, deleteEvent, getClients } from '../services/firebaseService';
 import { Event, Client } from '../types';
 import { Plus, Search, Edit2, Trash2, Calendar, MapPin, User, DollarSign } from 'lucide-react';
@@ -12,6 +13,7 @@ import { format } from 'date-fns';
 
 const EventsPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [events, setEvents] = useState<Event[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,17 +40,17 @@ const EventsPage: React.FC = () => {
       const selectedClient = clients.find(c => c.id === watchedClientId);
       if (selectedClient) {
         const eventTypeMap = {
-          wedding: 'Wedding',
-          debutante: 'Debutante',
-          birthday: 'Birthday',
-          graduation: 'Graduation',
-          other: 'Event'
+          wedding: t('events.types.wedding'),
+          debutante: t('events.types.debutante'),
+          birthday: t('events.types.birthday'),
+          graduation: t('events.types.graduation'),
+          other: t('events.types.other')
         };
         const eventName = `${eventTypeMap[watchedType]} ${selectedClient.name}`;
         setValue('name', eventName);
       }
     }
-  }, [watchedClientId, watchedType, clients, setValue]);
+  }, [watchedClientId, watchedType, clients, setValue, t]);
 
   const fetchData = async () => {
     if (!user) return;
@@ -109,7 +111,7 @@ const EventsPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
+    if (window.confirm(t('events.deleteConfirm'))) {
       try {
         await deleteEvent(id);
         await fetchData();
@@ -206,12 +208,12 @@ const EventsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Events</h1>
-          <p className="text-gray-600 mt-1">Manage your event portfolio</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('events.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('events.subtitle')}</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus size={20} className="mr-2" />
-          Add Event
+          {t('events.addEvent')}
         </Button>
       </div>
 
@@ -221,7 +223,7 @@ const EventsPage: React.FC = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
-            placeholder="Search events..."
+            placeholder={t('events.searchEvents')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -232,11 +234,11 @@ const EventsPage: React.FC = () => {
           onChange={(e) => setFilterStatus(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
         >
-          <option value="all">All Status</option>
-          <option value="planning">Planning</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="completed">Completed</option>
-          <option value="canceled">Canceled</option>
+          <option value="all">{t('events.allStatus')}</option>
+          <option value="planning">{t('events.status.planning')}</option>
+          <option value="confirmed">{t('events.status.confirmed')}</option>
+          <option value="completed">{t('events.status.completed')}</option>
+          <option value="canceled">{t('events.status.canceled')}</option>
         </select>
       </div>
 
@@ -248,14 +250,14 @@ const EventsPage: React.FC = () => {
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{event.name}</h3>
                 <span className={`inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(event.status)}`}>
-                  {event.status}
+                  {t(`events.status.${event.status}`)}
                 </span>
               </div>
               <div className="flex space-x-2">
                 <button
                   onClick={() => handleEdit(event)}
                   className="text-gray-400 hover:text-purple-600 transition-colors"
-                  title="Editar evento"
+                  title={t('common.edit')}
                 >
                   <Edit2 size={16} />
                 </button>
@@ -269,7 +271,7 @@ const EventsPage: React.FC = () => {
                 <button
                   onClick={() => handleDelete(event.id)}
                   className="text-gray-400 hover:text-red-600 transition-colors"
-                  title="Excluir evento"
+                  title={t('common.delete')}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -292,9 +294,9 @@ const EventsPage: React.FC = () => {
             </div>
             
             <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
-              <span className="text-sm text-gray-500 capitalize">{event.type}</span>
+              <span className="text-sm text-gray-500 capitalize">{t(`events.types.${event.type}`)}</span>
               <span className="text-lg font-bold text-gray-900">
-                R$ {event.contractTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {t('currency')} {event.contractTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
             </div>
             
@@ -345,7 +347,7 @@ const EventsPage: React.FC = () => {
 
       {filteredEvents.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No events found</p>
+          <p className="text-gray-500">{t('events.noEventsFound')}</p>
         </div>
       )}
 
@@ -353,21 +355,21 @@ const EventsPage: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={editingEvent ? 'Edit Event' : 'Add New Event'}
+        title={editingEvent ? t('events.editEvent') : t('events.addNewEvent')}
         size="lg"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="clientId" className="block text-sm font-medium text-gray-700 mb-1">
-                Client *
+                {t('events.fields.client')} *
               </label>
               <select
                 id="clientId"
-                {...register('clientId', { required: 'Client is required' })}
+                {...register('clientId', { required: t('events.validation.clientRequired') })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                <option value="">Select a client</option>
+                <option value="">{t('events.fields.selectClient')}</option>
                 {clients.map(client => (
                   <option key={client.id} value={client.id}>{client.name}</option>
                 ))}
@@ -379,19 +381,19 @@ const EventsPage: React.FC = () => {
 
             <div>
               <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-                Event Type *
+                {t('events.fields.eventType')} *
               </label>
               <select
                 id="type"
-                {...register('type', { required: 'Event type is required' })}
+                {...register('type', { required: t('events.validation.typeRequired') })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                <option value="">Select event type</option>
-                <option value="wedding">Wedding</option>
-                <option value="debutante">Debutante</option>
-                <option value="birthday">Birthday</option>
-                <option value="graduation">Graduation</option>
-                <option value="other">Other</option>
+                <option value="">{t('events.fields.selectEventType')}</option>
+                <option value="wedding">{t('events.types.wedding')}</option>
+                <option value="debutante">{t('events.types.debutante')}</option>
+                <option value="birthday">{t('events.types.birthday')}</option>
+                <option value="graduation">{t('events.types.graduation')}</option>
+                <option value="other">{t('events.types.other')}</option>
               </select>
               {errors.type && (
                 <p className="text-red-500 text-sm mt-1">{errors.type.message}</p>
@@ -401,12 +403,12 @@ const EventsPage: React.FC = () => {
 
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Event Name *
+              {t('events.fields.eventName')} *
             </label>
             <input
               type="text"
               id="name"
-              {...register('name', { required: 'Event name is required' })}
+              {...register('name', { required: t('events.validation.nameRequired') })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
             {errors.name && (
@@ -417,12 +419,12 @@ const EventsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-                Event Date *
+                {t('events.fields.eventDate')} *
               </label>
               <input
                 type="date"
                 id="date"
-                {...register('date', { required: 'Event date is required' })}
+                {...register('date', { required: t('events.validation.dateRequired') })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
               {errors.date && (
@@ -432,17 +434,17 @@ const EventsPage: React.FC = () => {
 
             <div>
               <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                Status *
+                {t('common.status')} *
               </label>
               <select
                 id="status"
-                {...register('status', { required: 'Status is required' })}
+                {...register('status', { required: t('events.validation.statusRequired') })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                <option value="planning">Planning</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="completed">Completed</option>
-                <option value="canceled">Canceled</option>
+                <option value="planning">{t('events.status.planning')}</option>
+                <option value="confirmed">{t('events.status.confirmed')}</option>
+                <option value="completed">{t('events.status.completed')}</option>
+                <option value="canceled">{t('events.status.canceled')}</option>
               </select>
               {errors.status && (
                 <p className="text-red-500 text-sm mt-1">{errors.status.message}</p>
@@ -453,12 +455,12 @@ const EventsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                Location *
+                {t('events.fields.location')} *
               </label>
               <input
                 type="text"
                 id="location"
-                {...register('location', { required: 'Location is required' })}
+                {...register('location', { required: t('events.validation.locationRequired') })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
               {errors.location && (
@@ -468,7 +470,7 @@ const EventsPage: React.FC = () => {
 
             <div>
               <label htmlFor="contractTotal" className="block text-sm font-medium text-gray-700 mb-1">
-                Contract Total (R$) *
+                {t('events.fields.contractTotal')} ({t('currency')}) *
               </label>
               <input
                 type="number"
@@ -476,8 +478,8 @@ const EventsPage: React.FC = () => {
                 step="0.01"
                 min="0"
                 {...register('contractTotal', { 
-                  required: 'Contract total is required',
-                  min: { value: 0, message: 'Amount must be positive' }
+                  required: t('events.validation.contractRequired'),
+                  min: { value: 0, message: t('events.validation.amountPositive') }
                 })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
@@ -489,7 +491,7 @@ const EventsPage: React.FC = () => {
 
           <div>
             <label htmlFor="details" className="block text-sm font-medium text-gray-700 mb-1">
-              Additional Details
+              {t('events.fields.additionalDetails')}
             </label>
             <textarea
               id="details"
@@ -501,10 +503,10 @@ const EventsPage: React.FC = () => {
 
           <div className="flex justify-end space-x-3 pt-4">
             <Button type="button" variant="secondary" onClick={handleCloseModal}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit">
-              {editingEvent ? 'Update' : 'Create'} Event
+              {editingEvent ? t('common.update') : t('common.create')} {t('navigation.events')}
             </Button>
           </div>
         </form>

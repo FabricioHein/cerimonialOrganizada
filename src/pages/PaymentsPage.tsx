@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { getPayments, addPayment, updatePayment, deletePayment, getEvents } from '../services/firebaseService';
 import { Payment, Event } from '../types';
 import { Plus, Search, Edit2, Trash2, DollarSign, Calendar, CheckCircle, XCircle } from 'lucide-react';
@@ -10,6 +11,7 @@ import { format } from 'date-fns';
 
 const PaymentsPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +83,7 @@ const PaymentsPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this payment?')) {
+    if (window.confirm(t('payments.deleteConfirm'))) {
       try {
         await deletePayment(id);
         await fetchData();
@@ -148,12 +150,12 @@ const PaymentsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Payments</h1>
-          <p className="text-gray-600 mt-1">Track all your event payments</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('payments.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('payments.subtitle')}</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
           <Plus size={20} className="mr-2" />
-          Add Payment
+          {t('payments.addPayment')}
         </Button>
       </div>
 
@@ -162,9 +164,9 @@ const PaymentsPage: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Received</p>
+              <p className="text-sm font-medium text-gray-600">{t('payments.totalReceived')}</p>
               <p className="text-2xl font-bold text-green-600">
-                R$ {totalReceived.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {t('currency')} {totalReceived.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
             </div>
             <CheckCircle className="h-12 w-12 text-green-600 opacity-80" />
@@ -174,9 +176,9 @@ const PaymentsPage: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending Payments</p>
+              <p className="text-sm font-medium text-gray-600">{t('payments.pendingPayments')}</p>
               <p className="text-2xl font-bold text-orange-600">
-                R$ {totalPending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {t('currency')} {totalPending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
             </div>
             <XCircle className="h-12 w-12 text-orange-600 opacity-80" />
@@ -186,7 +188,7 @@ const PaymentsPage: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Payments</p>
+              <p className="text-sm font-medium text-gray-600">{t('payments.totalPayments')}</p>
               <p className="text-2xl font-bold text-purple-600">
                 {payments.length}
               </p>
@@ -202,7 +204,7 @@ const PaymentsPage: React.FC = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
-            placeholder="Search payments..."
+            placeholder={t('payments.searchPayments')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -213,16 +215,16 @@ const PaymentsPage: React.FC = () => {
           onChange={(e) => setFilterStatus(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
         >
-          <option value="all">All Payments</option>
-          <option value="received">Received</option>
-          <option value="pending">Pending</option>
+          <option value="all">{t('payments.allPayments')}</option>
+          <option value="received">{t('payments.received')}</option>
+          <option value="pending">{t('payments.pending')}</option>
         </select>
       </div>
 
       {/* Payments List */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Payment List</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('payments.paymentList')}</h2>
         </div>
         <div className="divide-y divide-gray-200">
           {filteredPayments.map((payment) => (
@@ -234,7 +236,7 @@ const PaymentsPage: React.FC = () => {
                       {payment.eventName}
                     </h3>
                     <span className={`inline-block px-2 py-1 text-xs rounded-full ${getMethodColor(payment.method)}`}>
-                      {payment.method.toUpperCase()}
+                      {t(`payments.methods.${payment.method}`)}
                     </span>
                   </div>
                   
@@ -245,7 +247,7 @@ const PaymentsPage: React.FC = () => {
                     </div>
                     <div className="flex items-center">
                       <DollarSign size={16} className="mr-1" />
-                      R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      {t('currency')} {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </div>
                   </div>
                   
@@ -266,12 +268,12 @@ const PaymentsPage: React.FC = () => {
                     {payment.received ? (
                       <>
                         <CheckCircle size={16} className="mr-1" />
-                        Received
+                        {t('payments.received')}
                       </>
                     ) : (
                       <>
                         <XCircle size={16} className="mr-1" />
-                        Pending
+                        {t('payments.pending')}
                       </>
                     )}
                   </button>
@@ -299,7 +301,7 @@ const PaymentsPage: React.FC = () => {
 
       {filteredPayments.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No payments found</p>
+          <p className="text-gray-500">{t('payments.noPaymentsFound')}</p>
         </div>
       )}
 
@@ -307,19 +309,19 @@ const PaymentsPage: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={editingPayment ? 'Edit Payment' : 'Add New Payment'}
+        title={editingPayment ? t('payments.editPayment') : t('payments.addNewPayment')}
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label htmlFor="eventId" className="block text-sm font-medium text-gray-700 mb-1">
-              Event *
+              {t('payments.fields.event')} *
             </label>
             <select
               id="eventId"
-              {...register('eventId', { required: 'Event is required' })}
+              {...register('eventId', { required: t('payments.validation.eventRequired') })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
-              <option value="">Select an event</option>
+              <option value="">{t('payments.fields.selectEvent')}</option>
               {events.map(event => (
                 <option key={event.id} value={event.id}>{event.name}</option>
               ))}
@@ -332,7 +334,7 @@ const PaymentsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-                Amount (R$) *
+                {t('common.amount')} ({t('currency')}) *
               </label>
               <input
                 type="number"
@@ -340,8 +342,8 @@ const PaymentsPage: React.FC = () => {
                 step="0.01"
                 min="0"
                 {...register('amount', { 
-                  required: 'Amount is required',
-                  min: { value: 0, message: 'Amount must be positive' }
+                  required: t('payments.validation.amountRequired'),
+                  min: { value: 0, message: t('payments.validation.amountPositive') }
                 })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
@@ -352,12 +354,12 @@ const PaymentsPage: React.FC = () => {
 
             <div>
               <label htmlFor="paymentDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Payment Date *
+                {t('payments.fields.paymentDate')} *
               </label>
               <input
                 type="date"
                 id="paymentDate"
-                {...register('paymentDate', { required: 'Payment date is required' })}
+                {...register('paymentDate', { required: t('payments.validation.dateRequired') })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
               {errors.paymentDate && (
@@ -368,18 +370,18 @@ const PaymentsPage: React.FC = () => {
 
           <div>
             <label htmlFor="method" className="block text-sm font-medium text-gray-700 mb-1">
-              Payment Method *
+              {t('payments.fields.paymentMethod')} *
             </label>
             <select
               id="method"
-              {...register('method', { required: 'Payment method is required' })}
+              {...register('method', { required: t('payments.validation.methodRequired') })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
-              <option value="">Select payment method</option>
-              <option value="pix">PIX</option>
-              <option value="card">Card</option>
-              <option value="boleto">Boleto</option>
-              <option value="cash">Cash</option>
+              <option value="">{t('payments.fields.selectPaymentMethod')}</option>
+              <option value="pix">{t('payments.methods.pix')}</option>
+              <option value="card">{t('payments.methods.card')}</option>
+              <option value="boleto">{t('payments.methods.boleto')}</option>
+              <option value="cash">{t('payments.methods.cash')}</option>
             </select>
             {errors.method && (
               <p className="text-red-500 text-sm mt-1">{errors.method.message}</p>
@@ -394,13 +396,13 @@ const PaymentsPage: React.FC = () => {
               className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
             />
             <label htmlFor="received" className="ml-2 block text-sm text-gray-900">
-              Payment received
+              {t('payments.paymentReceived')}
             </label>
           </div>
 
           <div>
             <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-              Notes
+              {t('common.notes')}
             </label>
             <textarea
               id="notes"
@@ -412,10 +414,10 @@ const PaymentsPage: React.FC = () => {
 
           <div className="flex justify-end space-x-3 pt-4">
             <Button type="button" variant="secondary" onClick={handleCloseModal}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit">
-              {editingPayment ? 'Update' : 'Create'} Payment
+              {editingPayment ? t('common.update') : t('common.create')} {t('navigation.payments')}
             </Button>
           </div>
         </form>

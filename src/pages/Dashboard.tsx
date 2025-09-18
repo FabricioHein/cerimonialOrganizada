@@ -71,12 +71,12 @@ const Dashboard: React.FC = () => {
     .filter(event => event.date > new Date() && event.status !== 'canceled')
     .slice(0, 5);
 
-  const upcomingPayments = payments
+  const futurePayments = payments
     .filter(payment => 
       !payment.received && 
-      payment.paymentDate >= new Date() &&
-      payment.paymentDate <= addDays(new Date(), 7)
+      payment.paymentDate >= new Date()
     )
+    .sort((a, b) => a.paymentDate.getTime() - b.paymentDate.getTime())
     .slice(0, 5);
 
   return (
@@ -187,7 +187,7 @@ const Dashboard: React.FC = () => {
                         ? 'bg-green-100 text-green-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
-                      {event.status}
+                      {t(`events.status.${event.status}`)}
                     </span>
                   </div>
                   <p className="text-sm font-medium text-gray-900">
@@ -201,20 +201,20 @@ const Dashboard: React.FC = () => {
           )}
         </div>
 
-        {/* Upcoming Payments */}
+        {/* Future Payments */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('dashboard.paymentsDueSoon')}</h2>
-          {upcomingPayments.length > 0 ? (
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Pagamentos Futuros</h2>
+          {futurePayments.length > 0 ? (
             <div className="space-y-3">
-              {upcomingPayments.map((payment) => (
+              {futurePayments.map((payment) => (
                 <div key={payment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <p className="font-medium text-gray-900">{payment.eventName}</p>
                     <p className="text-sm text-gray-600">
-                      {t('dashboard.due')}: {format(payment.paymentDate, 'dd/MM/yyyy')}
+                      Vencimento: {format(payment.paymentDate, 'dd/MM/yyyy')}
                     </p>
                     <span className="inline-block px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full mt-1">
-                      {payment.method}
+                      {t(`payments.methods.${payment.method}`)}
                     </span>
                   </div>
                   <p className="text-sm font-medium text-gray-900">
@@ -224,7 +224,7 @@ const Dashboard: React.FC = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">{t('dashboard.noPaymentsDue')}</p>
+            <p className="text-gray-500 text-center py-8">Nenhum pagamento futuro</p>
           )}
         </div>
       </div>
