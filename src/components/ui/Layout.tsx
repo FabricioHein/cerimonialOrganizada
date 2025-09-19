@@ -63,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-center h-16 px-4 bg-gradient-to-r from-purple-600 to-purple-800">
-            <h1 className="text-xl font-bold text-white">EventFinance</h1>
+            <h1 className="text-xl font-bold text-white">EventsOrganizze</h1>
           </div>
 
           {/* Navigation */}

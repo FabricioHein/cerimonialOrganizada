@@ -12,7 +12,7 @@ import { ptBR } from 'date-fns/locale';
 const ReportsPage: React.FC = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [events, setEvents] = useState<Event[]>([]);
+  const [ events, setEvents  ] = useState<Event[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);

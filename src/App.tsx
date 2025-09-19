@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/ui/Layout';
@@ -8,10 +8,7 @@ import Dashboard from './pages/Dashboard';
 import ClientsPage from './pages/ClientsPage';
 import EventsPage from './pages/EventsPage';
 import PaymentsPage from './pages/PaymentsPage';
-
-// Placeholder components for remaining pages
 import CalendarPage from './pages/CalendarPage';
-
 import ReportsPage from './pages/ReportsPage';
 
 function App() {
